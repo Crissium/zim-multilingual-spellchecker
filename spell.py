@@ -145,17 +145,6 @@ class SpellChecker:
 		self._enabled = True
 
 		self.buffer_initialise()
-	
-	@property
-	def enabled(self):
-		return self._enabled
-
-	@enabled.setter
-	def enabled(self, enabled):
-		if enabled and not self._enabled:
-			self.enable()
-		elif not enabled and self._enabled:
-			self.disable()
 
 	def buffer_initialise(self):
 		self._misspelled = gtk.TextTag.new(f'{self.PREFIX}-misspelled')
