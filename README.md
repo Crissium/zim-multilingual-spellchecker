@@ -16,7 +16,7 @@ cd ~/.local/share/zim/plugins
 git clone https://github.com/Crissium/zim-multilingual-spellchecker
 ```
 
-Then enable the plugin in Zim and set the default languages in 'Properties' as a whitespace separated list of language codes, e.g. `en_GB fr_FR`.
+Disable the built in spellchecker, then enable the plugin in Zim and set the default languages in 'Properties' as a whitespace separated list of language codes, e.g. `en_GB fr_FR`.
 
 # Credits
 
