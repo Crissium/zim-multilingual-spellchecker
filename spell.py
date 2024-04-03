@@ -193,7 +193,7 @@ class SpellChecker:
 		
 		if end.inside_word():
 			end.forward_word_end()
-		if not start.get_offset() and (start.inside_word() or start.ends_word()):
+		if not start.starts_word() and (start.inside_word() or start.ends_word()):
 			start.backward_word_start()
 		
 		self._buffer.remove_tag(self._misspelled, start, end)
