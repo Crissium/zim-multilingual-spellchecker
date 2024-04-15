@@ -393,7 +393,7 @@ class SpellPageViewExtension(PageViewExtension):
 			self.enable()
 		
 		def check_buffer_initialised(self):
-			if self._checker and not self._check_tag_table():
+			if self._checker and len(self._check_tag_table()) == 0:
 				self._checker.buffer_initialise()
 
 		def enable(self):
@@ -446,6 +446,7 @@ class SpellPageViewExtension(PageViewExtension):
 			self._checker.enable()
 
 	def __init__(self, plugin, pageview):
+		self._buffer_checkers = dict()
 		super().__init__(plugin, pageview)
 
 		properties = self.plugin.notebook_properties(self.pageview.notebook)
@@ -455,7 +456,7 @@ class SpellPageViewExtension(PageViewExtension):
 		self.uistate.setdefault('active', False)
 		self.toggle_spellcheck(self.uistate['active'])
 		self.connectto(self.pageview, 'page-changed', order=SIGNAL_AFTER)
-	
+
 	def on_properties_changed(self, properties):
 		self._languages = properties['languages']
 		textview = self.pageview.textview
@@ -481,16 +482,16 @@ class SpellPageViewExtension(PageViewExtension):
 		self.uistate['active'] = active
 	
 	def on_page_changed(self, pageview, page):
-		textview = pageview.textview
-		checker = getattr(textview, '_gtkspell', None)
-		if checker:
-			# A new buffer may be initialized, but it could also be an existing buffer linked to page
-			checker.check_buffer_initialised()
+		self.setup(pageview.textview)
 	
-	def setup(self):
-		textview = self.pageview.textview
+	def setup(self, textview=None):
+		if textview is None:
+			textview = self.pageview.textview
 		try:
-			checker = self._Adapter(textview, self._languages)
+			buffer = textview.get_buffer()
+			if buffer not in self._buffer_checkers:
+				self._buffer_checkers[buffer] = self._Adapter(textview, self._languages)
+			checker = self._buffer_checkers[buffer]
 		except Exception as e:
 			ErrorDialog(self.pageview, (
 				# _('Could not load spell checking'),
