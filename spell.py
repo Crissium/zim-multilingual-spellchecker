@@ -24,16 +24,19 @@ def _strip_diacritics(text):
 				   for c in unicodedata.normalize('NFKD', text)
 				   if unicodedata.category(c) != 'Mn' and not unicodedata.combining(c))
 
+
 def _remove_punctuation_and_spaces(text):
 	return ''.join(c
 				   for c in text
 				   if unicodedata.category(c)[0] not in ['P', 'Z'])
+
 
 def _expand_ligatures(text):
 	"""
 	Expands the ligatures 'œ' and 'æ' to their two-letter equivalent.
 	"""
 	return text.replace('œ', 'oe').replace('æ', 'ae').replace('Æ', 'AE').replace('Œ', 'OE')
+
 
 def _simplify(text):
 	"""
@@ -43,6 +46,7 @@ def _simplify(text):
 	text = _remove_punctuation_and_spaces(text)
 	text = _expand_ligatures(text)
 	return text.casefold()
+
 
 class SpellPlugin(PluginClass):
 	plugin_info = {
@@ -271,6 +275,21 @@ class SpellChecker:
 		
 		return menu
 
+	def _add_to_dict_menu(self, word):
+		menu = gtk.Menu()
+		
+		def add(item, language):
+			self._dictionaries[language].add(word)
+			self.recheck()
+		
+		for language in self.supported_languages:
+			if self._dictionaries[language].active:
+				item = gtk.MenuItem.new_with_label(language)
+				item.connect('activate', add, language)
+				menu.append(item)
+		
+		return menu
+
 	def _extend_menu(self, menu):
 		if not self._enabled:
 			return
@@ -292,6 +311,11 @@ class SpellChecker:
 				suggestions.set_submenu(self._suggestions_menu(word))
 				suggestions.show_all()
 				menu.prepend(suggestions)
+
+				add_to_dict = gtk.MenuItem.new_with_label('Add to dictionary')
+				add_to_dict.set_submenu(self._add_to_dict_menu(word))
+				add_to_dict.show_all()
+				menu.prepend(add_to_dict)
 
 	def _click_move_popup(self, *args):
 		self._marks['click'].move(self._buffer.get_iter_at_mark(self._buffer.get_insert()))
